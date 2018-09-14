@@ -25,16 +25,16 @@ public class XNotifyTemplate {
         for (int pos = 0; pos < valueLength; ) {
             val quoteStart = value.indexOf(quote, pos);
             if (quoteStart < 0) {
-                parts.add(new ConstPart(value.substring(pos)));
+                parts.add(new XNotifyPart(value.substring(pos), false));
                 break;
             }
 
             val quoteEnd = value.indexOf(quote, quoteStart + quoteLength);
             if (quoteEnd < 0) throw new RuntimeException("unmatched quote found in " + xNotify);
 
-            if (pos < quoteStart) parts.add(new ConstPart(value.substring(pos, quoteStart)));
+            if (pos < quoteStart) parts.add(new XNotifyPart(value.substring(pos, quoteStart), false));
 
-            parts.add(new VarPart(value.substring(quoteStart + quoteLength, quoteEnd)));
+            parts.add(new XNotifyPart(value.substring(quoteStart + quoteLength, quoteEnd), true));
 
             pos = quoteEnd + quoteLength;
         }

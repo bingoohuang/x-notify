@@ -9,7 +9,7 @@ public class XNotifyFactory {
             val xNotify = method.getAnnotation(XNotify.class);
             if (xNotify == null) throw new RuntimeException("@XNotify required for method " + method);
 
-            XNotifyTemplate template = new XNotifyTemplate(xNotify);
+            val template = new XNotifyTemplate(xNotify);
             return template.eval(args);
         });
     }

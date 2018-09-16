@@ -1,37 +1,45 @@
-package com.github.bingoohuang.xnotify;
+package com.github.bingoohuang.xnotify.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.val;
+import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 
 @RequiredArgsConstructor
-public class XNotifyPart {
+public class XNotifyVarPart implements XNotifyPart {
     private final String part;
-    private final boolean isVar;
+    private final String templateVar;
 
     private String datetimePattern;
-
     static Pattern datePattern = Pattern.compile("(\\d+)(年|月|日)");
     static Pattern timePattern = Pattern.compile("(\\d\\d):(\\d\\d)(:\\d\\d)?");
 
-    public String eval(Object arg) {
-        if (!isVar) return part;
+    public String eval(Object arg, Map<String, String> templateVars) {
+        String value = evalText(arg);
 
+        templateVars.put(StringUtils.defaultIfEmpty(templateVar, part), value);
+        return value;
+    }
+
+    private String evalText(Object arg) {
         if (arg instanceof DateTime) {
             if (datetimePattern == null) createDateTimePattern();
             return ((DateTime) arg).toString(datetimePattern);
+        } else {
+            return String.valueOf(arg);
         }
-
-        return String.valueOf(arg);
     }
 
     public boolean isVar() {
-        return isVar;
+        return true;
     }
 
     private synchronized void createDateTimePattern() {
+        if (datetimePattern != null) return;
+
         val sb = new StringBuffer();
         val dateMatcher = datePattern.matcher(part);
         while (dateMatcher.find()) {

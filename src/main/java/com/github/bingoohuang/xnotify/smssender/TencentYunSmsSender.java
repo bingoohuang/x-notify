@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
 import org.n3r.eql.util.Hex;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public class TencentYunSmsSender implements SmsSender {
     public String computeSig(String mobile, String random, long time) {
         val content = "appkey=" + appKey + "&random=" + random + "&time=" + time + "&mobile=" + mobile;
         val sha256 = MessageDigest.getInstance("SHA-256");
-        val hash = sha256.digest(content.getBytes("UTF-8"));
+        val hash = sha256.digest(content.getBytes(StandardCharsets.UTF_8));
         return Hex.encode(hash);
     }
 

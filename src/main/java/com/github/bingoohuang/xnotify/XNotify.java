@@ -3,7 +3,7 @@ package com.github.bingoohuang.xnotify;
 import java.lang.annotation.*;
 
 @Documented
-@Target({ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface XNotify {
     /**
@@ -18,5 +18,21 @@ public @interface XNotify {
      *
      * @return 模板变量引用符号。
      */
-    String quote() default "`";
+    String quoteOpen() default "`";
+
+    String quoteClose() default "`";
+
+    /**
+     * 对应的模板变量的名字，以,分割。
+     *
+     * @return 模板变量名字。
+     */
+    String templateVars() default "";
+
+    /**
+     * 对应的模板编码。
+     *
+     * @return 模板编码。
+     */
+    String templateCode() default "";
 }

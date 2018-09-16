@@ -22,7 +22,7 @@ public class SmsSenderTest {
     public void testYunpian() {
         val sender = new YunpianSmsSender("appkey");
 
-        sender.send("18612345678", "【奕起嗨】验证码为：#4321#（15分钟内有效），验证码打死也不要告诉别人哦！XX嗨");
+        sender.send("18612345678", "奕起嗨", "验证码为：#4321#（15分钟内有效），验证码打死也不要告诉别人哦！XX嗨");
     }
 
     @Test

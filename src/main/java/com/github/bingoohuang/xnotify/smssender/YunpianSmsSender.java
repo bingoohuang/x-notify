@@ -1,8 +1,8 @@
 package com.github.bingoohuang.xnotify.smssender;
 
 import com.alibaba.fastjson.JSON;
-import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.github.bingoohuang.xnotify.SmsSender;
+import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -27,14 +27,14 @@ public class YunpianSmsSender implements SmsSender {
      */
     @Override
     public void send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        send(mobile, text);
+        send(mobile, signName, text);
     }
 
-    public void send(String mobile, String text) {
+    public void send(String mobile, String signName, String text) {
         Map<String, String> req = Maps.newHashMap();
         req.put("apikey", apikey);
         req.put("mobile", mobile);
-        req.put("text", text);
+        req.put("text", "【" + signName + "】" + text);
 
         val reqJson = JSON.toJSONString(req);
         log.info("send req {}", reqJson);

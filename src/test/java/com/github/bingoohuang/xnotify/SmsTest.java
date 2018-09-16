@@ -1,17 +1,29 @@
 package com.github.bingoohuang.xnotify;
 
+import com.github.bingoohuang.xnotify.impl.SmsLog;
 import com.github.bingoohuang.xnotify.impl.XNotifyFactory;
-import com.github.bingoohuang.xnotify.smsprovider.YunpianSmsProvider;
 import lombok.val;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.n3r.eql.Eql;
+import org.n3r.eql.eqler.EqlerFactory;
+import org.n3r.eql.util.C;
+
+import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
 public class SmsTest {
     static Sms sms = XNotifyFactory.create(Sms.class);
+
+    @BeforeClass
+    public static void beforeClass() {
+        String sql = C.classResourceToString("h2-createTable.sql");
+        new Eql().execute(sql);
+    }
 
     @Test
     public void firstBlood() {
@@ -27,9 +39,14 @@ public class SmsTest {
         val code = RandomStringUtils.randomNumeric(6);
         String text = sms.sendConfirmCode("18551855099", "奕起嗨", code, "精武堂");
         assertThat(text).isEqualTo("验证码为：" + code + "（15分钟内有效），验证码打死也不要告诉别人哦！精武堂");
+
+        val dao = EqlerFactory.getEqler(SmsLogDao.class);
+        List<SmsLog> smsLogs = dao.querySmsLogs();
+        assertThat(smsLogs.size()).isEqualTo(1);
+        System.out.println(smsLogs.get(0));
     }
 
-    @XNotifyProvider(YunpianSmsProvider.class)
+    @XNotifyProvider(DbSmsProvider.class)
     public interface Sms {
         // 某排期课的开班人数未达标时，发送提醒
         @XNotify("[`静瑜伽`]有节课人数未达标，系统已自动取消已订课会员的预约：`2018年09月26日15:00`-`16:00``阴瑜伽`（`小班课`）")

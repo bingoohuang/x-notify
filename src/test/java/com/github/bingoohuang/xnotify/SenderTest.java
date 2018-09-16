@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 
-public class SmsSenderTest {
+public class SenderTest {
     @Test
     public void testTencent() {
         val sender = new TencentYunSmsSender("appkey", "1400055908");

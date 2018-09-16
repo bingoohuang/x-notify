@@ -13,4 +13,5 @@ public class AliyunSmsProvider implements SmsProvider {
     @Override public SmsSender getSmsSender() {
         return new AliyunSmsSender(XNotifyConfig.get("aliyun.accessKeyId"), XNotifyConfig.get("aliyun.accessSecret"));
     }
+
 }

@@ -5,6 +5,7 @@ import com.github.bingoohuang.xnotify.XNotify;
 import com.github.bingoohuang.xnotify.XNotifyProvider;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import lombok.var;
 import org.apache.commons.lang3.StringUtils;
 import org.n3r.eql.joor.Reflect;
 import org.springframework.cglib.proxy.Proxy;
@@ -28,13 +29,13 @@ public class XNotifyFactory {
 
         val xNotifyProvider = interfaceClass.getAnnotation(XNotifyProvider.class);
         if (xNotifyProvider != null) {
-            sendSms(method, args, template, eval, xNotifyProvider);
+            sendSms(method, args, template, eval, xNotifyProvider, xNotify);
         }
 
         return eval.getText();
     }
 
-    private static void sendSms(Method method, Object[] args, XNotifyTemplate template, TemplateEval eval, XNotifyProvider xNotifyProvider) {
+    private static void sendSms(Method method, Object[] args, XNotifyTemplate template, TemplateEval eval, XNotifyProvider xNotifyProvider, XNotify xNotify) {
         SmsProvider smsProvider = Reflect.on(xNotifyProvider.value()).create().get();
         val mobile = template.getMobile(args);
         if (StringUtils.isEmpty(mobile)) {
@@ -42,10 +43,15 @@ public class XNotifyFactory {
             return;
         }
 
-        val templateCode = eval.getTemplateCodeMap().get(smsProvider.getProviderName());
+        var templateCode = eval.getTemplateCodeMap().get(smsProvider.getProviderName());
+        if (templateCode == null) templateCode = xNotify.templateCode();
+
         val sigName = template.getSigName(args);
 
-        smsProvider.getSmsSender().send(mobile, sigName, templateCode, eval.getTemplateVars(), eval.getText());
+        val sender = smsProvider.getSmsSender();
+        val smsLog = sender.send(mobile, sigName, templateCode, eval.getTemplateVars(), eval.getText());
+
+        log.info("send log {}", smsLog);
     }
 
 

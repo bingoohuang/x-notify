@@ -3,12 +3,14 @@ package com.github.bingoohuang.xnotify.smssender;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
-import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.github.bingoohuang.xnotify.SmsSender;
+import com.github.bingoohuang.xnotify.impl.SmsLog;
+import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.google.common.collect.Lists;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
+import org.joda.time.DateTime;
 import org.n3r.eql.util.Hex;
 
 import java.nio.charset.StandardCharsets;
@@ -22,12 +24,20 @@ public class TencentYunSmsSender implements SmsSender {
     private final String sdkAppId;
 
     @Override
-    public void send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        send(mobile, signName, Integer.parseInt(templateCode), createParams(params));
+    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
+        val smsLog = send(mobile, signName, Integer.parseInt(templateCode), createParams(params));
+        smsLog.setEval(text);
+        smsLog.setTemplateCode(templateCode);
+        smsLog.setTemplateVars(JSON.toJSONString(params));
+        smsLog.setEval(text);
+        return smsLog;
     }
 
-    public void send(String mobile, String signName, int templateCode, List<String> params) {
+    public SmsLog send(String mobile, String signName, int templateCode, List<String> params) {
+        val smsLog = SmsLog.builder();
         val random = String.valueOf(WestId.next());
+        smsLog.logId(random).mobile(mobile).signName(signName).createTime(DateTime.now());
+
         val url = HttpUrl.parse("https://yun.tim.qq.com/v5/tlssmssvr/sendsms").newBuilder()
                 .addQueryParameter("sdkappid", sdkAppId) // sdkappid 请填写您在腾讯云上申请到的
                 .addQueryParameter("random", random)     // random 请填成随机数。
@@ -44,12 +54,15 @@ public class TencentYunSmsSender implements SmsSender {
                 .sig(computeSig(mobile, random, time))
                 .build();
         val reqJson = JSON.toJSONString(req);
-        log.info("send req {}", reqJson);
+        smsLog.req(reqJson).reqTime(DateTime.now());
 
         val rspJSON = OkHttp.postJSON(url, reqJson);
-        log.info("send rsp {}", rspJSON);
+        smsLog.rsp(rspJSON).rspTime(DateTime.now());
 
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
+        smsLog.rspId(rsp.getSid()).state(rsp.result == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
+
+        return smsLog.build();
     }
 
     private List<String> createParams(Map<String, String> params) {

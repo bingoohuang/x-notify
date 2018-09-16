@@ -1,13 +1,17 @@
 package com.github.bingoohuang.xnotify.smssender;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
 import com.github.bingoohuang.xnotify.SmsSender;
+import com.github.bingoohuang.xnotify.impl.SmsLog;
 import com.github.bingoohuang.xnotify.util.OkHttp;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.joda.time.DateTime;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -27,11 +31,18 @@ public class AliyunSmsSender implements SmsSender {
 
     // https://help.aliyun.com/document_detail/56189.html
     @Override
-    public void send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        send(mobile, signName, templateCode, params);
+    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
+        val smsLog = send(mobile, signName, templateCode, params);
+        smsLog.setEval(text);
+        return smsLog;
     }
 
-    public void send(String mobile, String signName, String templateCode, Map<String, String> params) {
+    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params) {
+        val smsLog = SmsLog.builder();
+        val outId = "" + WestId.next();
+        smsLog.logId(outId).mobile(mobile).signName(signName).createTime(DateTime.now())
+                .templateCode(templateCode).templateVars(JSON.toJSONString(params));
+
         val paras = new TreeMap<String, String>() {{
             // 1. 系统参数
             put("SignatureMethod", "HMAC-SHA1");
@@ -51,7 +62,7 @@ public class AliyunSmsSender implements SmsSender {
             put("SignName", signName);
             put("TemplateParam", JSON.toJSONString(params));
             put("TemplateCode", templateCode);
-            put("OutId", "" + WestId.next());
+            put("OutId", outId);
         }};
 
         // 3. 构造待签名的字符串
@@ -64,12 +75,20 @@ public class AliyunSmsSender implements SmsSender {
         // 4. 签名最后也要做特殊URL编码
         paras.put("Signature", enc(sign));
 
-        log.info("send req {}", JSON.toJSONString(paras));
+        smsLog.req(JSON.toJSONString(paras));
+        smsLog.reqTime(DateTime.now());
 
         // 最终打印出合法GET请求的URL
-        val rsp = OkHttp.encodedGet("http://dysmsapi.aliyuncs.com/", paras);
+        val rspJSON = OkHttp.encodedGet("http://dysmsapi.aliyuncs.com/", paras);
 
-        log.info("send rsp {}", rsp);
+        smsLog.rsp(rspJSON);
+        smsLog.rspTime(DateTime.now());
+
+        Rsp rsp = JSON.parseObject(rspJSON, Rsp.class);
+        smsLog.state("OK".equals(rsp.code) ? 2 /* SUCC */ : 3 /* FAIL */)
+                .rspId(rsp.getRequestId());
+
+        return smsLog.build();
     }
 
     @SneakyThrows
@@ -86,5 +105,15 @@ public class AliyunSmsSender implements SmsSender {
         mac.init(new SecretKeySpec(secretKey.getBytes(StandardCharsets.UTF_8), "HmacSHA1"));
         val signData = mac.doFinal(source.getBytes(StandardCharsets.UTF_8));
         return DatatypeConverter.printBase64Binary(signData);
+    }
+
+    @Data
+    public static class Rsp {
+        @JSONField(name = "RequestId")
+        private String requestId;
+        @JSONField(name = "Message")
+        private String message;
+        @JSONField(name = "Code")
+        private String code;
     }
 }

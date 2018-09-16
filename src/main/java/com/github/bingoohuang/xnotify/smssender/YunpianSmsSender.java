@@ -1,13 +1,16 @@
 package com.github.bingoohuang.xnotify.smssender;
 
 import com.alibaba.fastjson.JSON;
+import com.github.bingoohuang.westid.WestId;
 import com.github.bingoohuang.xnotify.SmsSender;
+import com.github.bingoohuang.xnotify.impl.SmsLog;
 import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
+import org.joda.time.DateTime;
 
 import java.util.Map;
 
@@ -26,22 +29,31 @@ public class YunpianSmsSender implements SmsSender {
      * @param text         发送消息（已经完成模板替换后的）
      */
     @Override
-    public void send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        send(mobile, signName, text);
+    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
+        SmsLog smsLog = send(mobile, signName, text);
+        smsLog.setTemplateVars(JSON.toJSONString(params));
+        return smsLog;
     }
 
-    public void send(String mobile, String signName, String text) {
+    public SmsLog send(String mobile, String signName, String text) {
+        val smsLog = SmsLog.builder();
+        smsLog.logId("" + WestId.next()).mobile(mobile).signName(signName).eval(text).createTime(DateTime.now());
+
         Map<String, String> req = Maps.newHashMap();
         req.put("apikey", apikey);
         req.put("mobile", mobile);
         req.put("text", "【" + signName + "】" + text);
 
         val reqJson = JSON.toJSONString(req);
-        log.info("send req {}", reqJson);
+        smsLog.req(reqJson).reqTime(DateTime.now());
 
         val rspJSON = OkHttp.postForm("https://sms.yunpian.com/v2/sms/single_send.json", req);
-        log.info("send rsp {}", rspJSON);
+        smsLog.rsp(rspJSON).rspTime(DateTime.now());
+
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
+        smsLog.rspId("" + rsp.getSid()).state(rsp.code == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
+
+        return smsLog.build();
     }
 
     // https://www.yunpian.com/doc/zh_CN/domestic/single_send.html

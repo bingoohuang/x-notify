@@ -1,5 +1,7 @@
 package com.github.bingoohuang.xnotify;
 
+import com.github.bingoohuang.xnotify.impl.SmsLog;
+
 import java.util.Map;
 
 public interface SmsSender {
@@ -12,5 +14,5 @@ public interface SmsSender {
      * @param params       模板参数
      * @param text         消息内容
      */
-    void send(String mobile, String signName, String templateCode, Map<String, String> params, String text);
+    SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text);
 }

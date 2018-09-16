@@ -3,7 +3,9 @@ package com.github.bingoohuang.xnotify.smssender;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
-import com.github.bingoohuang.xnotify.OkHttp;
+import com.github.bingoohuang.xnotify.util.OkHttp;
+import com.github.bingoohuang.xnotify.SmsSender;
+import com.google.common.collect.Lists;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.HttpUrl;
@@ -11,13 +13,19 @@ import org.n3r.eql.util.Hex;
 
 import java.security.MessageDigest;
 import java.util.List;
+import java.util.Map;
 
 @RequiredArgsConstructor @Slf4j
-public class TencentYunSmsSender {
+public class TencentYunSmsSender implements SmsSender {
     private final String appKey;
     private final String sdkAppId;
 
-    public void send(String mobile, String sign, int templateId, List<String> params) {
+    @Override
+    public void send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
+        send(mobile, signName, Integer.parseInt(templateCode), createParams(params));
+    }
+
+    public void send(String mobile, String signName, int templateCode, List<String> params) {
         val random = String.valueOf(WestId.next());
         val url = HttpUrl.parse("https://yun.tim.qq.com/v5/tlssmssvr/sendsms").newBuilder()
                 .addQueryParameter("sdkappid", sdkAppId) // sdkappid 请填写您在腾讯云上申请到的
@@ -27,10 +35,10 @@ public class TencentYunSmsSender {
         val time = System.currentTimeMillis() / 1000;
         val req = Req.builder()
                 .ext(random)
-                .templateId(templateId)
+                .templateId(templateCode)
                 .tel(new Req.Tel(mobile))
                 .params(params)
-                .sign(sign)
+                .sign(signName)
                 .time(time)
                 .sig(computeSig(mobile, random, time))
                 .build();
@@ -41,6 +49,15 @@ public class TencentYunSmsSender {
         log.info("send rsp {}", rspJSON);
 
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
+    }
+
+    private List<String> createParams(Map<String, String> params) {
+        List<String> l = Lists.newArrayList();
+        for (val e : params.entrySet()) {
+            l.add(e.getValue());
+        }
+
+        return l;
     }
 
     /**

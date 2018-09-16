@@ -1,4 +1,4 @@
-package com.github.bingoohuang.xnotify;
+package com.github.bingoohuang.xnotify.util;
 
 import lombok.SneakyThrows;
 import lombok.val;
@@ -32,11 +32,11 @@ public class OkHttp {
 
 
     @SneakyThrows
-    public static String get(String url, Map<String, String> map) {
+    public static String encodedGet(String url, Map<String, String> encodedQueryParameters) {
         val urlBuilder = HttpUrl.parse(url).newBuilder();
 
-        for (val e : map.entrySet()) {
-            urlBuilder.addQueryParameter(e.getKey(), e.getValue());
+        for (val e : encodedQueryParameters.entrySet()) {
+            urlBuilder.addEncodedQueryParameter(e.getKey(), e.getValue());
         }
 
         val request = new Request.Builder().url(urlBuilder.build()).get().build();

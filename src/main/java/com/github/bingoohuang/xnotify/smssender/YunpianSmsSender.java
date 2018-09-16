@@ -1,7 +1,8 @@
 package com.github.bingoohuang.xnotify.smssender;
 
 import com.alibaba.fastjson.JSON;
-import com.github.bingoohuang.xnotify.OkHttp;
+import com.github.bingoohuang.xnotify.util.OkHttp;
+import com.github.bingoohuang.xnotify.SmsSender;
 import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +11,24 @@ import lombok.val;
 
 import java.util.Map;
 
+
 @RequiredArgsConstructor @Slf4j
-public class YunpianSmsSender {
+public class YunpianSmsSender implements SmsSender {
     private final String apikey;
+
+    /**
+     * 发送短信。
+     *
+     * @param mobile       目标手机号码
+     * @param signName     云片的签名，是在模板申请中定死的，不能参数传递。如果需要使用不同签名，需要申请新的模板。
+     * @param templateCode 模板编号（暂不用）
+     * @param params       模板参数（暂不用）
+     * @param text         发送消息（已经完成模板替换后的）
+     */
+    @Override
+    public void send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
+        send(mobile, text);
+    }
 
     public void send(String mobile, String text) {
         Map<String, String> req = Maps.newHashMap();
@@ -23,9 +39,7 @@ public class YunpianSmsSender {
         val reqJson = JSON.toJSONString(req);
         log.info("send req {}", reqJson);
 
-        val url = "https://sms.yunpian.com/v2/sms/single_send.json";
-
-        val rspJSON = OkHttp.   postForm(url, req);
+        val rspJSON = OkHttp.postForm("https://sms.yunpian.com/v2/sms/single_send.json", req);
         log.info("send rsp {}", rspJSON);
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
     }

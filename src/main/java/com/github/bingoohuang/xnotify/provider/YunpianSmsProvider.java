@@ -1,8 +1,8 @@
-package com.github.bingoohuang.xnotify.smsprovider;
+package com.github.bingoohuang.xnotify.provider;
 
 import com.github.bingoohuang.xnotify.SmsProvider;
 import com.github.bingoohuang.xnotify.SmsSender;
-import com.github.bingoohuang.xnotify.smssender.YunpianSmsSender;
+import com.github.bingoohuang.xnotify.sender.YunpianSmsSender;
 import com.github.bingoohuang.xnotify.util.XNotifyConfig;
 
 public class YunpianSmsProvider implements SmsProvider {

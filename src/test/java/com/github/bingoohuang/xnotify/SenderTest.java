@@ -1,8 +1,8 @@
 package com.github.bingoohuang.xnotify;
 
-import com.github.bingoohuang.xnotify.smssender.AliyunSmsSender;
-import com.github.bingoohuang.xnotify.smssender.TencentYunSmsSender;
-import com.github.bingoohuang.xnotify.smssender.YunpianSmsSender;
+import com.github.bingoohuang.xnotify.sender.AliyunSmsSender;
+import com.github.bingoohuang.xnotify.sender.TencentYunSmsSender;
+import com.github.bingoohuang.xnotify.sender.YunpianSmsSender;
 import com.google.common.collect.Lists;
 import lombok.val;
 import org.junit.Test;

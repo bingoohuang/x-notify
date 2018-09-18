@@ -49,10 +49,10 @@ public class SmsTest {
     @XNotifyProvider(DbSmsProvider.class)
     public interface Sms {
         // 某排期课的开班人数未达标时，发送提醒
-        @XNotify("[`静瑜伽`]有节课人数未达标，系统已自动取消已订课会员的预约：`2018年09月26日15:00`-`16:00``阴瑜伽`（`小班课`）")
+        @XNotify("[#静瑜伽#]有节课人数未达标，系统已自动取消已订课会员的预约：#2018年09月26日15:00#-#16:00##阴瑜伽#（#小班课#）")
         String classNotMeetRemind(String merchantName, DateTime start, DateTime end, String scheduleName, String courseTypeName);
 
-        @XNotify(value = "验证码为：`code`（15分钟内有效），验证码打死也不要告诉别人哦！`name`", templateCode = "tencent:68689,aliyun:SMS_12841674")
+        @XNotify(value = "验证码为：#code#（15分钟内有效），验证码打死也不要告诉别人哦！#name#", templateCode = "tencent:68689,aliyun:SMS_12841674")
         String sendConfirmCode(@XNotifyParam("mobile") String mobile, @XNotifyParam("signName") String signName, String code, String merchantName);
     }
 }

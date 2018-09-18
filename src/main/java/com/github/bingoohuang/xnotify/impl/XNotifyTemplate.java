@@ -43,9 +43,10 @@ public class XNotifyTemplate {
     }
 
     public void parse() {
-        val quoteOpen = xNotify.quoteOpen();
+        String[] quotes = xNotify.quotes().split(",", 2);
+        val quoteOpen = quotes[0];
         val quoteOpenLength = quoteOpen.length();
-        val quoteClose = xNotify.quoteClose();
+        val quoteClose = quotes[1];
         val quoteCloseLength = quoteOpen.length();
 
         val value = xNotify.value();
@@ -62,7 +63,7 @@ public class XNotifyTemplate {
             }
 
             val quoteEnd = value.indexOf(quoteClose, quoteStart + quoteOpenLength);
-            if (quoteEnd < 0) throw new RuntimeException("unmatched quote found in " + xNotify);
+            if (quoteEnd < 0) throw new RuntimeException("unmatched quotes found in " + xNotify);
 
             if (pos < quoteStart) parts.add(new XNotifyConstPart(value.substring(pos, quoteStart)));
 

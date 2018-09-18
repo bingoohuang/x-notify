@@ -18,9 +18,7 @@ public @interface XNotify {
      *
      * @return 模板变量引用符号。
      */
-    String quoteOpen() default "`";
-
-    String quoteClose() default "`";
+    String quotes() default "#,#";
 
     /**
      * 对应的模板变量的名字，以,分割。

@@ -1,6 +1,6 @@
 package com.github.bingoohuang.xnotify;
 
-import com.github.bingoohuang.xnotify.smsprovider.DbSmsProvider;
+import com.github.bingoohuang.xnotify.provider.DbSmsProvider;
 import org.n3r.eql.eqler.annotations.Eqler;
 
 @Eqler

@@ -1,4 +1,4 @@
-package com.github.bingoohuang.xnotify.smsprovider;
+package com.github.bingoohuang.xnotify.provider;
 
 import com.alibaba.fastjson.JSON;
 import com.github.bingoohuang.westid.WestId;

@@ -8,7 +8,7 @@ import okhttp3.HttpUrl;
 
 import java.util.Map;
 
-public class Wx {
+public class WxTemplateMessageSender {
     /**
      * 发送微信模板消息。
      *
@@ -25,7 +25,7 @@ public class Wx {
     }
 
     /**
-     * JavaBean for Wx Template Message POST data, like :
+     * JavaBean for WxTemplateMessageSender Template Message POST data, like :
      *
      * <a href="https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1433751277">API REFERENCE</a>
      * 发送模板消息
@@ -41,27 +41,11 @@ public class Wx {
      *          "appid":"xiaochengxuappid12345",
      *          "pagepath":"index?foo=bar"
      *      },
-     *      "data":{
-     *          "first": {
-     *              "value":"恭喜你购买成功！",
-     *              "color":"#173177"
-     *          },
-     *          "keyword1":{
-     *              "value":"巧克力",
-     *              "color":"#173177"
-     *          },
-     *          "keyword2": {
-     *              "value":"39.8元",
-     *              "color":"#173177"
-     *          },
-     *          "keyword3": {
-     *              "value":"2014年9月22日",
-     *              "color":"#173177"
-     *          },
-     *          "remark":{
-     *              "value":"欢迎再次购买！",
-     *              "color":"#173177"
-     *          }
+     *      "data":{ "first": { "value":"恭喜你购买成功！", "color":"#173177" },
+     *          "keyword1":{ "value":"巧克力", "color":"#173177" },
+     *          "keyword2": { "value":"39.8元", "color":"#173177" },
+     *          "keyword3": { "value":"2014年9月22日", "color":"#173177" },
+     *          "remark":{ "value":"欢迎再次购买！", "color":"#173177" }
      *      }
      * }
      * </pre>

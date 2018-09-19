@@ -17,6 +17,7 @@ public abstract class DbProvider implements XProvider {
             XNotifyLog log = XNotifyLog.builder()
                     .logId("" + WestId.next())
                     .state(0)
+                    .targetId(target == null ? null : target.getTargetId())
                     .mobile(target == null ? null : target.getMobile())
                     .msgtype(msgType)
                     .username(target == null ? null : target.getUsername())

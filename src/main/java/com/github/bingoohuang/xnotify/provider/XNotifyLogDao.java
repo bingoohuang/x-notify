@@ -18,7 +18,7 @@ public interface XNotifyLogDao {
 
     String SELECT_CLAUSE = "select " + FIELDS + " from " + TABLE;
 
-    @Sql(SELECT_CLAUSE)
+    @Sql(SELECT_CLAUSE + " where state = 0")
     List<XNotifyLog> queryLogs();
 
     @Sql(SELECT_CLAUSE + " where log_id = ##")

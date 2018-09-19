@@ -3,8 +3,9 @@ package com.github.bingoohuang.xnotify.sender;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
-import com.github.bingoohuang.xnotify.SmsSender;
-import com.github.bingoohuang.xnotify.impl.SmsLog;
+import com.github.bingoohuang.xnotify.XNotifySender;
+import com.github.bingoohuang.xnotify.XNotifyTarget;
+import com.github.bingoohuang.xnotify.impl.XNotifyLog;
 import com.github.bingoohuang.xnotify.util.OkHttp;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -25,20 +26,20 @@ import java.util.SimpleTimeZone;
 import java.util.TreeMap;
 
 @RequiredArgsConstructor @Slf4j
-public class AliyunSmsSender implements SmsSender {
+public class AliyunSmsSender implements XNotifySender {
     private final String accessKeyId;
     private final String accessSecret;
 
     // https://help.aliyun.com/document_detail/56189.html
     @Override
-    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        val smsLog = send(mobile, signName, templateCode, params);
+    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+        val smsLog = send(target.getMobile(), signName, templateCode, params);
         smsLog.setEval(text);
         return smsLog;
     }
 
-    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params) {
-        val smsLog = SmsLog.builder();
+    public XNotifyLog send(String mobile, String signName, String templateCode, Map<String, String> params) {
+        val smsLog = XNotifyLog.builder();
         val outId = "" + WestId.next();
         smsLog.logId(outId).mobile(mobile).signName(signName).createTime(DateTime.now())
                 .templateCode(templateCode).templateVars(JSON.toJSONString(params));

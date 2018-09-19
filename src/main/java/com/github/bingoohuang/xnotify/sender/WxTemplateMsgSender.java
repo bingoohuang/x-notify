@@ -1,14 +1,37 @@
-package com.github.bingoohuang.xnotify.util;
-
+package com.github.bingoohuang.xnotify.sender;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
-import lombok.*;
+import com.github.bingoohuang.xnotify.XNotifySender;
+import com.github.bingoohuang.xnotify.XNotifyTarget;
+import com.github.bingoohuang.xnotify.impl.XNotifyLog;
+import com.github.bingoohuang.xnotify.util.JsonEscape;
+import com.github.bingoohuang.xnotify.util.OkHttp;
+import lombok.Data;
+import lombok.val;
 import okhttp3.HttpUrl;
 
 import java.util.Map;
 
-public class WxTemplateMessageSender {
+public class WxTemplateMsgSender implements XNotifySender {
+    @Override
+    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+        val json = JsonEscape.escapeJson(text);
+        val templateId = getTemplateId(templateCode);
+        val content = json.replace("template_id_var", templateId);
+        sendTemplateMessage(getAccessToken(), content);
+
+        return null;
+    }
+
+    private String getTemplateId(String classDotMethodName) {
+        return null;
+    }
+
+    private String getAccessToken() {
+        return null;
+    }
+
     /**
      * 发送微信模板消息。
      *
@@ -74,40 +97,6 @@ public class WxTemplateMessageSender {
      * "msgid":200228332
      * }
      */
-    @Data @NoArgsConstructor @AllArgsConstructor @Builder
-    public static class Req {
-        @JSONField(name = "template_id")
-        private String templateId;
-        @JSONField(name = "touser")
-        private String openId;
-        private String url;
-        @JSONField(name = "miniprogram")
-        private Mini miniProgram;
-        @JSONField(name = "data") @Singular("put")
-        private Map<String, Item> data;
-    }
-
-    @Data @NoArgsConstructor @AllArgsConstructor
-    public static class Item {
-        private String value;
-        private String color = "#173177";
-
-        public static Item of(String value, String color) {
-            return new Item(value, color);
-        }
-
-        public static Item of(String value) {
-            return of(value, "#173177");
-        }
-    }
-
-    @Data
-    public static class Mini {
-        @JSONField(name = "appid")
-        private String appId;
-        @JSONField(name = "pagepath")
-        private String pagePath;
-    }
 
     @Data
     public static class Rsp {

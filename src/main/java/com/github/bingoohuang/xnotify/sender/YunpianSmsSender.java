@@ -2,8 +2,9 @@ package com.github.bingoohuang.xnotify.sender;
 
 import com.alibaba.fastjson.JSON;
 import com.github.bingoohuang.westid.WestId;
-import com.github.bingoohuang.xnotify.SmsSender;
-import com.github.bingoohuang.xnotify.impl.SmsLog;
+import com.github.bingoohuang.xnotify.XNotifySender;
+import com.github.bingoohuang.xnotify.XNotifyTarget;
+import com.github.bingoohuang.xnotify.impl.XNotifyLog;
 import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.google.common.collect.Maps;
 import lombok.Data;
@@ -16,27 +17,27 @@ import java.util.Map;
 
 
 @RequiredArgsConstructor @Slf4j
-public class YunpianSmsSender implements SmsSender {
+public class YunpianSmsSender implements XNotifySender {
     private final String apikey;
 
     /**
      * 发送短信。
      *
-     * @param mobile       目标手机号码
+     * @param target       发送目标对象。
      * @param signName     云片的签名，是在模板申请中定死的，不能参数传递。如果需要使用不同签名，需要申请新的模板。
-     * @param templateCode 模板编号（暂不用）
-     * @param params       模板参数（暂不用）
-     * @param text         发送消息（已经完成模板替换后的）
+     * @param templateCode 模板编号（暂不用）。
+     * @param params       模板参数（暂不用）。
+     * @param text         发送消息（已经完成模板替换后的）。
      */
     @Override
-    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        SmsLog smsLog = send(mobile, signName, text);
-        smsLog.setTemplateVars(JSON.toJSONString(params));
-        return smsLog;
+    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+        XNotifyLog XNotifyLog = send(target.getMobile(), signName, text);
+        XNotifyLog.setTemplateVars(JSON.toJSONString(params));
+        return XNotifyLog;
     }
 
-    public SmsLog send(String mobile, String signName, String text) {
-        val smsLog = SmsLog.builder();
+    public XNotifyLog send(String mobile, String signName, String text) {
+        val smsLog = XNotifyLog.builder();
         smsLog.logId("" + WestId.next()).mobile(mobile).signName(signName).eval(text).createTime(DateTime.now());
 
         Map<String, String> req = Maps.newHashMap();

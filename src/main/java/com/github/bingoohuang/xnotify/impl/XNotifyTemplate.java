@@ -2,7 +2,9 @@ package com.github.bingoohuang.xnotify.impl;
 
 
 import com.github.bingoohuang.xnotify.XNotify;
+import com.github.bingoohuang.xnotify.XNotifyMsgType;
 import com.github.bingoohuang.xnotify.XNotifyParam;
+import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -17,26 +19,40 @@ import java.util.Map;
 public class XNotifyTemplate {
     private final List<XNotifyPart> parts = Lists.newArrayList();
     private final XNotify xNotify;
-    private final int mobileArgIndex;
+    private final int targetArgIndex;
     private final int sigNameArgIndex;
     private final List<Integer> varIndices;
 
     public XNotifyTemplate(Method method, XNotify xNotify) {
         this.xNotify = xNotify;
-        this.mobileArgIndex = findArg(method, "mobile");
+        this.targetArgIndex = findTargetArgIndex(method);
         this.sigNameArgIndex = findArg(method, "signName");
         this.varIndices = createVarIndex(method);
         parse();
+    }
+
+    private int findTargetArgIndex(Method method) {
+        int index = findArg(method, "target");
+        if (index >= 0) return index;
+
+        for (int i = 0; i < method.getParameterCount(); ++i) {
+            Class<?> pType = method.getParameterTypes()[i];
+            if (XNotifyTarget.class.isAssignableFrom(pType)) return i;
+        }
+
+        return -1;
     }
 
     private List<Integer> createVarIndex(Method method) {
         List<Integer> indices = Lists.newArrayList();
 
         for (int i = 0; i < method.getParameterCount(); ++i) {
-            val xNotifyParam = method.getParameters()[i].getAnnotation(XNotifyParam.class);
-            if (xNotifyParam == null) {
-                indices.add(i);
-            }
+            val xp = method.getParameters()[i].getAnnotation(XNotifyParam.class);
+            if (xp != null) continue;
+
+            if (XNotifyTarget.class.isAssignableFrom(method.getParameterTypes()[i])) continue;
+
+            indices.add(i);
         }
 
         return indices;
@@ -67,7 +83,8 @@ public class XNotifyTemplate {
 
             if (pos < quoteStart) parts.add(new XNotifyConstPart(value.substring(pos, quoteStart)));
 
-            parts.add(new XNotifyVarPart(value.substring(quoteStart + quoteOpenLength, quoteEnd), getTemplateVar(templateVars, index++)));
+            val varDemo = value.substring(quoteStart + quoteOpenLength, quoteEnd);
+            parts.add(new XNotifyVarPart(varDemo, getTemplateVar(templateVars, index++)));
 
             pos = quoteEnd + quoteCloseLength;
         }
@@ -97,17 +114,42 @@ public class XNotifyTemplate {
 
     private static int findArg(Method method, String paramName) {
         for (int i = 0; i < method.getParameterCount(); ++i) {
-            val xNotifyParam = method.getParameters()[i].getAnnotation(XNotifyParam.class);
-            if (xNotifyParam != null && xNotifyParam.value().equals(paramName)) {
-                return i;
-            }
+            val xp = method.getParameters()[i].getAnnotation(XNotifyParam.class);
+            if (xp != null && xp.value().equals(paramName)) return i;
         }
 
         return -1;
     }
 
-    public String getMobile(Object[] args) {
-        return mobileArgIndex >= 0 ? (String) args[mobileArgIndex] : null;
+    @SuppressWarnings("unchecked")
+    public XNotifyTarget getTarget(Object[] args, XNotifyMsgType type) {
+        if (targetArgIndex < 0) return null;
+
+        if (args[targetArgIndex] instanceof XNotifyTarget) {
+            return (XNotifyTarget) args[targetArgIndex];
+        }
+
+        if (args[targetArgIndex] instanceof String) {
+            val target = (String) args[targetArgIndex];
+            if (target == null) return null;
+
+            if (type == XNotifyMsgType.SMS) {
+                return new XNotifyTarget() {
+                    @SuppressWarnings("unchecked")
+                    @Override public String getMobile() {
+                        return target;
+                    }
+                };
+            } else if (type == XNotifyMsgType.WX_TEMPLATE_MSG)
+                return new XNotifyTarget() {
+                    @SuppressWarnings("unchecked")
+                    @Override public String getOpenid() {
+                        return target;
+                    }
+                };
+        }
+
+        throw new RuntimeException("unsupported type of target arg " + args[targetArgIndex]);
     }
 
     public String getSigName(Object[] args) {

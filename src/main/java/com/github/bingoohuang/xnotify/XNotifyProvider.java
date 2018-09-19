@@ -7,4 +7,6 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface XNotifyProvider {
     Class<? extends XProvider> value();
+
+    XNotifyMsgType type();
 }

@@ -3,8 +3,9 @@ package com.github.bingoohuang.xnotify.sender;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
-import com.github.bingoohuang.xnotify.SmsSender;
-import com.github.bingoohuang.xnotify.impl.SmsLog;
+import com.github.bingoohuang.xnotify.XNotifySender;
+import com.github.bingoohuang.xnotify.XNotifyTarget;
+import com.github.bingoohuang.xnotify.impl.XNotifyLog;
 import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.google.common.collect.Lists;
 import lombok.*;
@@ -19,13 +20,13 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor @Slf4j
-public class TencentYunSmsSender implements SmsSender {
+public class TencentYunSmsSender implements XNotifySender {
     private final String appKey;
     private final String sdkAppId;
 
     @Override
-    public SmsLog send(String mobile, String signName, String templateCode, Map<String, String> params, String text) {
-        val smsLog = send(mobile, signName, Integer.parseInt(templateCode), createParams(params));
+    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+        val smsLog = send(target.getMobile(), signName, Integer.parseInt(templateCode), createParams(params));
         smsLog.setEval(text);
         smsLog.setTemplateCode(templateCode);
         smsLog.setTemplateVars(JSON.toJSONString(params));
@@ -33,8 +34,8 @@ public class TencentYunSmsSender implements SmsSender {
         return smsLog;
     }
 
-    public SmsLog send(String mobile, String signName, int templateCode, List<String> params) {
-        val smsLog = SmsLog.builder();
+    public XNotifyLog send(String mobile, String signName, int templateCode, List<String> params) {
+        val smsLog = XNotifyLog.builder();
         val random = String.valueOf(WestId.next());
         smsLog.logId(random).mobile(mobile).signName(signName).createTime(DateTime.now());
 

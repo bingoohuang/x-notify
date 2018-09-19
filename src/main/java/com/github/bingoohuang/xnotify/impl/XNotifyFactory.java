@@ -1,10 +1,6 @@
 package com.github.bingoohuang.xnotify.impl;
 
-import com.github.bingoohuang.xnotify.SmsProvider;
-import com.github.bingoohuang.xnotify.XNotify;
-import com.github.bingoohuang.xnotify.XNotifyProvider;
-import com.github.bingoohuang.xnotify.XProvider;
-import com.github.bingoohuang.xnotify.provider.WxProvider;
+import com.github.bingoohuang.xnotify.*;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
@@ -33,37 +29,29 @@ public class XNotifyFactory {
         if (xNotifyProvider != null) {
             XProvider xProvider = Reflect.on(xNotifyProvider.value()).create().get();
 
-            if (xProvider instanceof SmsProvider) {
-                sendSms((SmsProvider) xProvider, method, args, template, eval, xNotify);
-            } else if (xProvider instanceof WxProvider) {
-                sendWx((WxProvider)xProvider, method, args, template, eval, xNotify);
-            }
+            val target = findTarget(template, args, method, xNotifyProvider.type());
+            if (target != null) notify(xProvider, target, method, args, template, eval, xNotify);
         }
 
         return eval.getText();
     }
 
-    private static void sendWx(WxProvider xProvider, Method method, Object[] args, XNotifyTemplate template, TemplateEval eval, XNotify xNotify) {
-        xProvider.send(eval.getText(), method);
+    private static XNotifyTarget findTarget(XNotifyTemplate template, Object[] args, Method method, XNotifyMsgType type) {
+        val target = template.getTarget(args, type);
+        if (target == null) log.warn("message not send because of no target for " + method);
+        return target;
     }
 
-    private static void sendSms(SmsProvider xProvider, Method method, Object[] args, XNotifyTemplate template, TemplateEval eval, XNotify xNotify) {
-        val mobile = template.getMobile(args);
-        if (StringUtils.isEmpty(mobile)) {
-            log.warn("sms not send because of no mobile for " + method);
-            return;
-        }
-
+    private static void notify(XProvider xProvider, XNotifyTarget target, Method method, Object[] args,
+                               XNotifyTemplate template, TemplateEval eval, XNotify xNotify) {
         var templateCode = eval.getTemplateCodeMap().get(xProvider.getProviderName());
-        if (templateCode == null) templateCode = xNotify.templateCode();
+        if (StringUtils.isEmpty(templateCode)) templateCode = xNotify.templateCode();
+        if (StringUtils.isEmpty(templateCode)) templateCode = method.getDeclaringClass().getSimpleName() + "." + method.getName();
 
         val sigName = template.getSigName(args);
-
-        val sender = xProvider.getSmsSender();
-        val smsLog = sender.send(mobile, sigName, templateCode, eval.getTemplateVars(), eval.getText());
+        val sender = xProvider.getSender();
+        val smsLog = sender.send(target, sigName, templateCode, eval.getTemplateVars(), eval.getText());
 
         log.info("send log {}", smsLog);
     }
-
-
 }

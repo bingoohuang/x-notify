@@ -64,7 +64,7 @@ public class NotifyTest {
         assertThat(XNotifyLogs.get(1).getUsername()).isEqualTo("bingoohuang");
     }
 
-    @XNotifyProvider(value = MyDbProvider.class, type = "sms")
+    @XNotifyProvider(value = MySaveDbProvider.class, type = "sms")
     public interface Sms {
         // 某排期课的开班人数未达标时，发送提醒
         @XNotify("[#静瑜伽#]有节课人数未达标，系统已自动取消已订课会员的预约：#2018年09月26日15:00#-#16:00##阴瑜伽#（#小班课#）")
@@ -98,7 +98,7 @@ public class NotifyTest {
                 "}");
     }
 
-    @XNotifyProvider(value = MyDbProvider.class, type = "wx")
+    @XNotifyProvider(value = MySaveDbProvider.class, type = "wx")
     public interface Wx {
         @XNotify(value = "{" +
                 " `touser`:`<OPENID>`," +

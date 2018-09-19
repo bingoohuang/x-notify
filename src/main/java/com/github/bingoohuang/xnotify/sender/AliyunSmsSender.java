@@ -3,6 +3,7 @@ package com.github.bingoohuang.xnotify.sender;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
+import com.github.bingoohuang.xnotify.XNotifyLogSender;
 import com.github.bingoohuang.xnotify.XNotifySender;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.github.bingoohuang.xnotify.impl.XNotifyLog;
@@ -26,7 +27,7 @@ import java.util.SimpleTimeZone;
 import java.util.TreeMap;
 
 @RequiredArgsConstructor @Slf4j
-public class AliyunSmsSender implements XNotifySender {
+public class AliyunSmsSender implements XNotifySender, XNotifyLogSender {
     private final String accessKeyId;
     private final String accessSecret;
 
@@ -38,12 +39,22 @@ public class AliyunSmsSender implements XNotifySender {
         return smsLog;
     }
 
-    public XNotifyLog send(String mobile, String signName, String templateCode, Map<String, String> params) {
-        val smsLog = XNotifyLog.builder();
-        val outId = "" + WestId.next();
-        smsLog.logId(outId).mobile(mobile).signName(signName).createTime(DateTime.now())
-                .templateCode(templateCode).templateVars(JSON.toJSONString(params));
+    @SuppressWarnings("unchecked")
+    @Override public void send(XNotifyLog log) {
+        Map<String, String> params = JSON.parseObject(log.getTemplateVars(), Map.class);
+        send(log, log.getMobile(), log.getSignName(), log.getTemplateCode(), params, log.getLogId());
+    }
 
+    public XNotifyLog send(String mobile, String signName, String templateCode, Map<String, String> params) {
+        val smsLog = XNotifyLog.builder().build();
+        val outId = "" + WestId.next();
+        smsLog.setLogId(outId).setMobile(mobile).setSignName(signName).setCreateTime(DateTime.now())
+                .setTemplateCode(templateCode).setTemplateVars(JSON.toJSONString(params));
+
+        return send(smsLog, mobile, signName, templateCode, params, outId);
+    }
+
+    private XNotifyLog send(XNotifyLog smsLog, String mobile, String signName, String templateCode, Map<String, String> params, String outId) {
         val paras = new TreeMap<String, String>() {{
             // 1. 系统参数
             put("SignatureMethod", "HMAC-SHA1");
@@ -76,20 +87,18 @@ public class AliyunSmsSender implements XNotifySender {
         // 4. 签名最后也要做特殊URL编码
         paras.put("Signature", enc(sign));
 
-        smsLog.req(JSON.toJSONString(paras));
-        smsLog.reqTime(DateTime.now());
+        smsLog.setReq(JSON.toJSONString(paras)).setReqTime(DateTime.now());
 
         // 最终打印出合法GET请求的URL
         val rspJSON = OkHttp.encodedGet("http://dysmsapi.aliyuncs.com/", paras);
 
-        smsLog.rsp(rspJSON);
-        smsLog.rspTime(DateTime.now());
+        smsLog.setRsp(rspJSON).setRspTime(DateTime.now());
 
-        Rsp rsp = JSON.parseObject(rspJSON, Rsp.class);
-        smsLog.state("OK".equals(rsp.code) ? 2 /* SUCC */ : 3 /* FAIL */)
-                .rspId(rsp.getRequestId());
+        val rsp = JSON.parseObject(rspJSON, Rsp.class);
+        smsLog.setState("OK".equals(rsp.code) ? 2 /* SUCC */ : 3 /* FAIL */)
+                .setRspId(rsp.getRequestId());
 
-        return smsLog.build();
+        return smsLog;
     }
 
     @SneakyThrows

@@ -122,7 +122,7 @@ public class XNotifyTemplate {
 
     @SuppressWarnings("unchecked")
     public XNotifyTarget getTarget(Object[] args, String type) {
-        if (targetArgIndex < 0) return null;
+        if (targetArgIndex < 0) return new XNotifyTarget() {};
 
         if (args[targetArgIndex] instanceof XNotifyTarget) {
             return (XNotifyTarget) args[targetArgIndex];

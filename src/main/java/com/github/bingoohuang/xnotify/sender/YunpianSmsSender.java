@@ -2,6 +2,7 @@ package com.github.bingoohuang.xnotify.sender;
 
 import com.alibaba.fastjson.JSON;
 import com.github.bingoohuang.westid.WestId;
+import com.github.bingoohuang.xnotify.XNotifyLogSender;
 import com.github.bingoohuang.xnotify.XNotifySender;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.github.bingoohuang.xnotify.impl.XNotifyLog;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 
 @RequiredArgsConstructor @Slf4j
-public class YunpianSmsSender implements XNotifySender {
+public class YunpianSmsSender implements XNotifySender, XNotifyLogSender {
     private final String apikey;
 
     /**
@@ -36,25 +37,33 @@ public class YunpianSmsSender implements XNotifySender {
         return XNotifyLog;
     }
 
-    public XNotifyLog send(String mobile, String signName, String text) {
-        val smsLog = XNotifyLog.builder();
-        smsLog.logId("" + WestId.next()).mobile(mobile).signName(signName).eval(text).createTime(DateTime.now());
+    @Override public void send(XNotifyLog log) {
+        send(log, log.getMobile(), log.getSignName(), log.getEval());
+    }
 
+    public XNotifyLog send(String mobile, String signName, String text) {
+        val smsLog = XNotifyLog.builder().build();
+        smsLog.setLogId("" + WestId.next()).setMobile(mobile).setSignName(signName).setEval(text).setCreateTime(DateTime.now());
+
+        return send(smsLog, mobile, signName, text);
+    }
+
+    private XNotifyLog send(XNotifyLog smsLog, String mobile, String signName, String text) {
         Map<String, String> req = Maps.newHashMap();
         req.put("apikey", apikey);
         req.put("mobile", mobile);
         req.put("text", "【" + signName + "】" + text);
 
         val reqJson = JSON.toJSONString(req);
-        smsLog.req(reqJson).reqTime(DateTime.now());
+        smsLog.setReq(reqJson).setReqTime(DateTime.now());
 
         val rspJSON = OkHttp.postForm("https://sms.yunpian.com/v2/sms/single_send.json", req);
-        smsLog.rsp(rspJSON).rspTime(DateTime.now());
+        smsLog.setRsp(rspJSON).setRspTime(DateTime.now());
 
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
-        smsLog.rspId("" + rsp.getSid()).state(rsp.code == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
+        smsLog.setRspId("" + rsp.getSid()).setState(rsp.code == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
 
-        return smsLog.build();
+        return smsLog;
     }
 
     // https://www.yunpian.com/doc/zh_CN/domestic/single_send.html

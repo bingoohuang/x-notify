@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 import org.joda.time.DateTime;
 
-@Data @AllArgsConstructor @NoArgsConstructor @Builder
+@Data @AllArgsConstructor @NoArgsConstructor @Builder @Accessors(chain = true)
 public class XNotifyLog {
     private String logId;
     private String targetId;

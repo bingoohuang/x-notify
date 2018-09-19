@@ -6,18 +6,22 @@ import lombok.val;
 
 import java.util.Properties;
 
-public class XNotifyConfig {
-    public static final Properties config = loadEnvProperties();
+public interface XNotifyConfig {
+    default String getConfig(String key) {
+        return get(key);
+    }
+
+    Properties config = loadEnvProperties();
 
     @SneakyThrows
-    private static Properties loadEnvProperties() {
+    static Properties loadEnvProperties() {
         val is = ClzPath.toInputStream("xnotify.properties");
         val p = new Properties();
         p.load(is);
         return p;
     }
 
-    public static String get(String name) {
+    static String get(String name) {
         return config.getProperty(name);
     }
 }

@@ -2,6 +2,8 @@ package com.github.bingoohuang.xnotify.sender;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.github.bingoohuang.westid.WestId;
+import com.github.bingoohuang.xnotify.XNotifyLogSender;
 import com.github.bingoohuang.xnotify.XNotifySender;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.github.bingoohuang.xnotify.impl.XNotifyLog;
@@ -10,27 +12,30 @@ import com.github.bingoohuang.xnotify.util.OkHttp;
 import lombok.Data;
 import lombok.val;
 import okhttp3.HttpUrl;
+import org.joda.time.DateTime;
 
 import java.util.Map;
 
-public class WxTemplateMsgSender implements XNotifySender {
+public abstract class WxTemplateMsgSender implements XNotifySender, XNotifyLogSender {
     @Override
     public XNotifyLog send(XNotifyTarget target, String msgType, String signName, String templateCode, Map<String, String> params, String text) {
         val json = JsonEscape.escapeJson(text);
-        val templateId = getTemplateId(templateCode);
+
+        val log = XNotifyLog.builder().build();
+        val outId = "" + WestId.next();
+        log.setLogId(outId).setMobile(target.getMobile()).setSignName(signName).setCreateTime(DateTime.now())
+                .setTemplateCode(templateCode).setTemplateVars(JSON.toJSONString(params));
+
+        val templateId = getTemplateId(log);
         val content = json.replace("template_id_var", templateId);
-        sendTemplateMessage(getAccessToken(), content);
+        sendTemplateMessage(getAccessToken(log), content);
 
         return null;
     }
 
-    private String getTemplateId(String classDotMethodName) {
-        return null;
-    }
+    abstract protected String getTemplateId(XNotifyLog log);
 
-    private String getAccessToken() {
-        return null;
-    }
+    abstract protected String getAccessToken(XNotifyLog log);
 
     /**
      * 发送微信模板消息。
@@ -45,6 +50,12 @@ public class WxTemplateMsgSender implements XNotifySender {
 
         val s = OkHttp.postJSON(url, json);
         return JSON.parseObject(s, Rsp.class);
+    }
+
+    @Override public void send(XNotifyLog log) {
+        val content = log.getEval().replace("template_id_var", getTemplateId(log));
+        log.setEval(content);
+        sendTemplateMessage(getAccessToken(log), content);
     }
 
     /**

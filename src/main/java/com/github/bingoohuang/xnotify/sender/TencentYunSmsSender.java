@@ -3,6 +3,7 @@ package com.github.bingoohuang.xnotify.sender;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
 import com.github.bingoohuang.westid.WestId;
+import com.github.bingoohuang.xnotify.XNotifyLogSender;
 import com.github.bingoohuang.xnotify.XNotifySender;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.github.bingoohuang.xnotify.impl.XNotifyLog;
@@ -20,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @RequiredArgsConstructor @Slf4j
-public class TencentYunSmsSender implements XNotifySender {
+public class TencentYunSmsSender implements XNotifySender, XNotifyLogSender {
     private final String appKey;
     private final String sdkAppId;
 
@@ -34,11 +35,21 @@ public class TencentYunSmsSender implements XNotifySender {
         return smsLog;
     }
 
-    public XNotifyLog send(String mobile, String signName, int templateCode, List<String> params) {
-        val smsLog = XNotifyLog.builder();
-        val random = String.valueOf(WestId.next());
-        smsLog.logId(random).mobile(mobile).signName(signName).createTime(DateTime.now());
+    @SuppressWarnings("unchecked")
+    @Override public void send(XNotifyLog log) {
+        Map<String, String> params = JSON.parseObject(log.getTemplateVars(), Map.class);
+        send(log, log.getMobile(), log.getSignName(), Integer.parseInt(log.getTemplateCode()), createParams(params), log.getLogId());
+    }
 
+    public XNotifyLog send(String mobile, String signName, int templateCode, List<String> params) {
+        val smsLog = XNotifyLog.builder().build();
+        val random = String.valueOf(WestId.next());
+        smsLog.setLogId(random).setMobile(mobile).setSignName(signName).setCreateTime(DateTime.now());
+
+        return send(smsLog, mobile, signName, templateCode, params, random);
+    }
+
+    private XNotifyLog send(XNotifyLog smsLog, String mobile, String signName, int templateCode, List<String> params, String random) {
         val url = HttpUrl.parse("https://yun.tim.qq.com/v5/tlssmssvr/sendsms").newBuilder()
                 .addQueryParameter("sdkappid", sdkAppId) // sdkappid 请填写您在腾讯云上申请到的
                 .addQueryParameter("random", random)     // random 请填成随机数。
@@ -55,15 +66,15 @@ public class TencentYunSmsSender implements XNotifySender {
                 .sig(computeSig(mobile, random, time))
                 .build();
         val reqJson = JSON.toJSONString(req);
-        smsLog.req(reqJson).reqTime(DateTime.now());
+        smsLog.setReq(reqJson).setReqTime(DateTime.now());
 
         val rspJSON = OkHttp.postJSON(url, reqJson);
-        smsLog.rsp(rspJSON).rspTime(DateTime.now());
+        smsLog.setRsp(rspJSON).setRspTime(DateTime.now());
 
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
-        smsLog.rspId(rsp.getSid()).state(rsp.result == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
+        smsLog.setRspId(rsp.getSid()).setState(rsp.result == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
 
-        return smsLog.build();
+        return smsLog;
     }
 
     private List<String> createParams(Map<String, String> params) {

@@ -1,5 +1,6 @@
 package com.github.bingoohuang.xnotify.impl;
 
+import com.github.bingoohuang.westcache.spring.SpringAppContext;
 import com.github.bingoohuang.xnotify.XNotify;
 import com.github.bingoohuang.xnotify.XNotifyProvider;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
@@ -30,7 +31,9 @@ public class XNotifyFactory {
 
         val xNotifyProvider = interfaceClass.getAnnotation(XNotifyProvider.class);
         if (xNotifyProvider != null) {
-            XProvider xProvider = Reflect.on(xNotifyProvider.value()).create().get();
+            XProvider xProvider = SpringAppContext.getBean(xNotifyProvider.value());
+            if (xProvider == null)
+                xProvider = Reflect.on(xNotifyProvider.value()).create().get();
 
             val msgType = xNotifyProvider.type();
             val target = template.getTarget(args, msgType);

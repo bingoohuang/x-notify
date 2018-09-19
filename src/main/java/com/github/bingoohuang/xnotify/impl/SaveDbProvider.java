@@ -1,37 +1,37 @@
-package com.github.bingoohuang.xnotify.provider;
+package com.github.bingoohuang.xnotify.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.github.bingoohuang.westid.WestId;
 import com.github.bingoohuang.xnotify.XNotifySender;
 import com.github.bingoohuang.xnotify.XProvider;
-import com.github.bingoohuang.xnotify.impl.XNotifyLog;
+import lombok.val;
 import org.joda.time.DateTime;
 
-public abstract class DbProvider implements XProvider {
+public abstract class SaveDbProvider implements XProvider {
     @Override public String getProviderName() {
         return "db";
     }
 
     @Override public XNotifySender getSender() {
         return (target, msgType, signName, templateCode, params, text) -> {
-            XNotifyLog log = XNotifyLog.builder()
+            val log = XNotifyLog.builder()
                     .logId("" + WestId.next())
                     .state(0)
-                    .targetId(target == null ? null : target.getTargetId())
-                    .mobile(target == null ? null : target.getMobile())
+                    .targetId(target.getTargetId())
+                    .mobile(target.getMobile())
                     .msgtype(msgType)
-                    .username(target == null ? null : target.getUsername())
-                    .openid(target == null ? null : target.getOpenid())
-                    .usergroup(target == null ? null : target.getUsergroup())
+                    .username(target.getUsername())
+                    .openid(target.getOpenid())
+                    .usergroup(target.getUsergroup())
                     .signName(signName)
                     .templateCode(templateCode)
                     .templateVars(JSON.toJSONString(params))
                     .eval(text)
                     .createTime(DateTime.now()).build();
-            getXNotifyLogDao().addLog(log);
+            saveLog(log);
             return log;
         };
     }
 
-    protected abstract XNotifyLogDao getXNotifyLogDao();
+    protected abstract void saveLog(XNotifyLog log);
 }

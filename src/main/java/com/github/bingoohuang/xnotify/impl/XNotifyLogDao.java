@@ -1,4 +1,4 @@
-package com.github.bingoohuang.xnotify.provider;
+package com.github.bingoohuang.xnotify.impl;
 
 import com.github.bingoohuang.xnotify.impl.XNotifyLog;
 import org.n3r.eql.eqler.annotations.Sql;
@@ -27,4 +27,9 @@ public interface XNotifyLogDao {
     @SqlOptions("NoWhere")
     @Sql("delete from " + TABLE)
     void clearLogs();
+
+    @Sql("update " + TABLE + " set eval = #?#, req = #?#, req_time = #?#, req_sender = #?#, " +
+            "rsp_id = #?#, rsp = #?#, rsp_time = #?#, state = #?# " +
+            "where log_id = #?#")
+    int finish(XNotifyLog log);
 }

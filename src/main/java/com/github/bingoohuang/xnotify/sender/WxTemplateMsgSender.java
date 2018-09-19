@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class WxTemplateMsgSender implements XNotifySender {
     @Override
-    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+    public XNotifyLog send(XNotifyTarget target, String msgType, String signName, String templateCode, Map<String, String> params, String text) {
         val json = JsonEscape.escapeJson(text);
         val templateId = getTemplateId(templateCode);
         val content = json.replace("template_id_var", templateId);

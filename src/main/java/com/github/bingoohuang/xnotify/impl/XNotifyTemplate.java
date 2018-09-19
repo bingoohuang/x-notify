@@ -2,7 +2,6 @@ package com.github.bingoohuang.xnotify.impl;
 
 
 import com.github.bingoohuang.xnotify.XNotify;
-import com.github.bingoohuang.xnotify.XNotifyMsgType;
 import com.github.bingoohuang.xnotify.XNotifyParam;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.google.common.base.Splitter;
@@ -122,7 +121,7 @@ public class XNotifyTemplate {
     }
 
     @SuppressWarnings("unchecked")
-    public XNotifyTarget getTarget(Object[] args, XNotifyMsgType type) {
+    public XNotifyTarget getTarget(Object[] args, String type) {
         if (targetArgIndex < 0) return null;
 
         if (args[targetArgIndex] instanceof XNotifyTarget) {
@@ -133,14 +132,14 @@ public class XNotifyTemplate {
             val target = (String) args[targetArgIndex];
             if (target == null) return null;
 
-            if (type == XNotifyMsgType.SMS) {
+            if (type.equals("sms")) {
                 return new XNotifyTarget() {
                     @SuppressWarnings("unchecked")
                     @Override public String getMobile() {
                         return target;
                     }
                 };
-            } else if (type == XNotifyMsgType.WX_TEMPLATE_MSG)
+            } else if (type.equals("wx"))
                 return new XNotifyTarget() {
                     @SuppressWarnings("unchecked")
                     @Override public String getOpenid() {

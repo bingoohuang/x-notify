@@ -9,10 +9,12 @@ import org.joda.time.DateTime;
 @Data @AllArgsConstructor @NoArgsConstructor @Builder
 public class XNotifyLog {
     private String logId;
+    private String targetId;
     private String mobile;
     private String username;
     private String openid;
     private String usergroup;
+    private String msgtype;
     private String signName;
     private String templateCode;
     private String templateVars;

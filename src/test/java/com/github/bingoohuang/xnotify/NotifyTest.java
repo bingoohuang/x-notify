@@ -1,7 +1,7 @@
 package com.github.bingoohuang.xnotify;
 
-import com.github.bingoohuang.xnotify.impl.XNotifyLog;
 import com.github.bingoohuang.xnotify.impl.XNotifyFactory;
+import com.github.bingoohuang.xnotify.impl.XNotifyLog;
 import lombok.val;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.joda.time.DateTime;
@@ -16,8 +16,9 @@ import java.util.List;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class SmsTest {
+public class NotifyTest {
     static Sms sms = XNotifyFactory.create(Sms.class);
+    static MyXNotifyLogDao dao = EqlerFactory.getEqler(MyXNotifyLogDao.class);
 
     @BeforeClass
     public static void beforeClass() {
@@ -36,11 +37,12 @@ public class SmsTest {
 
     @Test
     public void sendConfirmCode() {
+        dao.clearLogs();
+
         val code = RandomStringUtils.randomNumeric(6);
         val text = sms.sendConfirmCode("18551855099", "奕起嗨", code, "精武堂");
         assertThat(text).isEqualTo("验证码为：" + code + "（15分钟内有效），验证码打死也不要告诉别人哦！精武堂");
 
-        val dao = EqlerFactory.getEqler(MyXNotifyLogDao.class);
         List<XNotifyLog> XNotifyLogs = dao.queryLogs();
         assertThat(XNotifyLogs.size()).isEqualTo(1);
 
@@ -62,7 +64,7 @@ public class SmsTest {
         assertThat(XNotifyLogs.get(1).getUsername()).isEqualTo("bingoohuang");
     }
 
-    @XNotifyProvider(value = MyDbProvider.class, type = XNotifyMsgType.SMS)
+    @XNotifyProvider(value = MyDbProvider.class, type = "sms")
     public interface Sms {
         // 某排期课的开班人数未达标时，发送提醒
         @XNotify("[#静瑜伽#]有节课人数未达标，系统已自动取消已订课会员的预约：#2018年09月26日15:00#-#16:00##阴瑜伽#（#小班课#）")
@@ -73,5 +75,42 @@ public class SmsTest {
 
         @XNotify(value = "验证码为：#code#（15分钟内有效），验证码打死也不要告诉别人哦！#name#", templateCode = "tencent:68689,aliyun:SMS_12841674")
         String sendConfirmCode(XNotifyTarget target, @XNotifyParam("signName") String signName, String code, String merchantName);
+    }
+
+
+    static Wx wx = XNotifyFactory.create(Wx.class);
+
+    @Test
+    public void test() {
+        val fmt = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+        val start = DateTime.parse("2018-09-18 16:56:21", fmt);
+        val msg = wx.buySuccess("12345", "黑巧克力", 99.9, start, "http://z.cn");
+        assertThat(msg).isEqualTo("{" +
+                " `touser`:`12345`," +
+                " `template_id`:`template_id_var`," +
+                " `data`:{`first`:{`value`:`恭喜你购买成功！`, `color`:`#173177` }," +
+                "  `keyword1`:{`value`:`黑巧克力`, `color`:`#173177` }," +
+                "  `keyword2`:{`value`:`99.9元`, `color`:`#173177` }," +
+                "  `keyword3`:{`value`:`2018年9月18日`, `color`:`#173177` }," +
+                "  `remark`:{`value`:`欢迎再次购买！`, `color`:`#173177` }" +
+                " }," +
+                " `url`:`http://z.cn`" +
+                "}");
+    }
+
+    @XNotifyProvider(value = MyDbProvider.class, type = "wx")
+    public interface Wx {
+        @XNotify(value = "{" +
+                " `touser`:`<OPENID>`," +
+                " `template_id`:`template_id_var`," +
+                " `data`:{`first`:{`value`:`恭喜你购买成功！`, `color`:`#173177` }," +
+                "  `keyword1`:{`value`:`<巧克力>`, `color`:`#173177` }," +
+                "  `keyword2`:{`value`:`<39.8>元`, `color`:`#173177` }," +
+                "  `keyword3`:{`value`:`<2014年9月22日>`, `color`:`#173177` }," +
+                "  `remark`:{`value`:`欢迎再次购买！`, `color`:`#173177` }" +
+                " }," +
+                " `url`:`<http://weixin.qq.com/download>`" +
+                "}", quotes = "<,>")
+        String buySuccess(String openId, String goodsName, double price, DateTime buyTime, String url);
     }
 }

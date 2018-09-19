@@ -25,7 +25,7 @@ public class TencentYunSmsSender implements XNotifySender {
     private final String sdkAppId;
 
     @Override
-    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+    public XNotifyLog send(XNotifyTarget target, String msgType, String signName, String templateCode, Map<String, String> params, String text) {
         val smsLog = send(target.getMobile(), signName, Integer.parseInt(templateCode), createParams(params));
         smsLog.setEval(text);
         smsLog.setTemplateCode(templateCode);

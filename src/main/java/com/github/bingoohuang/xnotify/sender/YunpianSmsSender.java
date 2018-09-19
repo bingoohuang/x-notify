@@ -30,7 +30,7 @@ public class YunpianSmsSender implements XNotifySender {
      * @param text         发送消息（已经完成模板替换后的）。
      */
     @Override
-    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+    public XNotifyLog send(XNotifyTarget target, String msgType, String signName, String templateCode, Map<String, String> params, String text) {
         XNotifyLog XNotifyLog = send(target.getMobile(), signName, text);
         XNotifyLog.setTemplateVars(JSON.toJSONString(params));
         return XNotifyLog;

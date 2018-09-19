@@ -32,7 +32,7 @@ public class AliyunSmsSender implements XNotifySender {
 
     // https://help.aliyun.com/document_detail/56189.html
     @Override
-    public XNotifyLog send(XNotifyTarget target, String signName, String templateCode, Map<String, String> params, String text) {
+    public XNotifyLog send(XNotifyTarget target, String msgType, String signName, String templateCode, Map<String, String> params, String text) {
         val smsLog = send(target.getMobile(), signName, templateCode, params);
         smsLog.setEval(text);
         return smsLog;

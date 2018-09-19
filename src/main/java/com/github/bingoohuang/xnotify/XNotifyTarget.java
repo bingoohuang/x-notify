@@ -4,6 +4,10 @@ package com.github.bingoohuang.xnotify;
  * 发送通知给谁。
  */
 public interface XNotifyTarget {
+    default String getTargetId() {
+        return null;
+    }
+
     /**
      * 手机号码。发短信时，需要。
      *

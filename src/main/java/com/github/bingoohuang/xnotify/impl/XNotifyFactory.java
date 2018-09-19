@@ -1,6 +1,9 @@
 package com.github.bingoohuang.xnotify.impl;
 
-import com.github.bingoohuang.xnotify.*;
+import com.github.bingoohuang.xnotify.XNotify;
+import com.github.bingoohuang.xnotify.XNotifyProvider;
+import com.github.bingoohuang.xnotify.XNotifyTarget;
+import com.github.bingoohuang.xnotify.XProvider;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import lombok.var;
@@ -29,29 +32,27 @@ public class XNotifyFactory {
         if (xNotifyProvider != null) {
             XProvider xProvider = Reflect.on(xNotifyProvider.value()).create().get();
 
-            val target = findTarget(template, args, method, xNotifyProvider.type());
-            if (target != null) notify(xProvider, target, method, args, template, eval, xNotify);
+            val msgType = xNotifyProvider.type();
+            val target = template.getTarget(args, msgType);
+
+            notify(xProvider, target, method, args, template, eval, xNotify, msgType);
         }
 
         return eval.getText();
     }
 
-    private static XNotifyTarget findTarget(XNotifyTemplate template, Object[] args, Method method, XNotifyMsgType type) {
-        val target = template.getTarget(args, type);
-        if (target == null) log.warn("message not send because of no target for " + method);
-        return target;
-    }
-
     private static void notify(XProvider xProvider, XNotifyTarget target, Method method, Object[] args,
-                               XNotifyTemplate template, TemplateEval eval, XNotify xNotify) {
+                               XNotifyTemplate template, TemplateEval eval, XNotify xNotify, String msgType) {
         var templateCode = eval.getTemplateCodeMap().get(xProvider.getProviderName());
         if (StringUtils.isEmpty(templateCode)) templateCode = xNotify.templateCode();
-        if (StringUtils.isEmpty(templateCode)) templateCode = method.getDeclaringClass().getSimpleName() + "." + method.getName();
+        if (StringUtils.isEmpty(templateCode))
+            templateCode = method.getDeclaringClass().getSimpleName() + "." + method.getName();
 
         val sigName = template.getSigName(args);
         val sender = xProvider.getSender();
-        val smsLog = sender.send(target, sigName, templateCode, eval.getTemplateVars(), eval.getText());
-
-        log.info("send log {}", smsLog);
+        if (sender != null) {
+            val smsLog = sender.send(target, msgType, sigName, templateCode, eval.getTemplateVars(), eval.getText());
+            log.info("send log {}", smsLog);
+        }
     }
 }

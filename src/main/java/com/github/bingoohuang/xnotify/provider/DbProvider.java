@@ -13,14 +13,15 @@ public abstract class DbProvider implements XProvider {
     }
 
     @Override public XNotifySender getSender() {
-        return (target, signName, templateCode, params, text) -> {
+        return (target, msgType, signName, templateCode, params, text) -> {
             XNotifyLog log = XNotifyLog.builder()
                     .logId("" + WestId.next())
                     .state(0)
-                    .mobile(target.getMobile())
-                    .username(target.getUsername())
-                    .openid(target.getOpenid())
-                    .usergroup(target.getUsergroup())
+                    .mobile(target == null ? null : target.getMobile())
+                    .msgtype(msgType)
+                    .username(target == null ? null : target.getUsername())
+                    .openid(target == null ? null : target.getOpenid())
+                    .usergroup(target == null ? null : target.getUsergroup())
                     .signName(signName)
                     .templateCode(templateCode)
                     .templateVars(JSON.toJSONString(params))

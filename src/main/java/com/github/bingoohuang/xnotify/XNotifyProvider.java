@@ -8,5 +8,10 @@ import java.lang.annotation.*;
 public @interface XNotifyProvider {
     Class<? extends XProvider> value();
 
-    XNotifyMsgType type();
+    /**
+     * Message type, like sms/wx
+     *
+     * @return Message type.
+     */
+    String type();
 }

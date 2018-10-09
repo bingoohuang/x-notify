@@ -84,7 +84,6 @@ public abstract class WxTemplateMsgSender implements XNotifySender, XNotifyLogSe
      * }
      * </pre>
      * <p>
-     * <p>
      * 参数	是否必填	说明
      * touser	是	接收者openid
      * template_id	是	模板ID

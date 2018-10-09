@@ -37,8 +37,8 @@ public class XNotifyTask implements Taskable {
 
         if ("sms".equals(log.getMsgtype())) {
             if ("aliyun".equals(log.getReqSender())) {
-                val accessKeyId = conf.getConfig("tencent.appKey");
-                val accessSecret = conf.getConfig("tencent.sdkAppId");
+                val accessKeyId = conf.getConfig("aliyun.accessKeyId");
+                val accessSecret = conf.getConfig("aliyun.accessSecret");
                 return new AliyunSmsSender(accessKeyId, accessSecret);
             }
 
@@ -48,8 +48,8 @@ public class XNotifyTask implements Taskable {
             }
 
             log.setReqSender("tencent");
-            val appKey = conf.getConfig("aliyun.accessKeyId");
-            val sdkAppId = conf.getConfig("aliyun.accessSecret");
+            val appKey = conf.getConfig("tencent.appKey");
+            val sdkAppId = conf.getConfig("tencent.sdkAppId");
             return new TencentYunSmsSender(appKey, sdkAppId);
         }
 

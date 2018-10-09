@@ -1,6 +1,5 @@
 package com.github.bingoohuang.xnotify.impl;
 
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.joda.time.DateTime;
@@ -8,10 +7,19 @@ import org.joda.time.DateTime;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-@RequiredArgsConstructor
+
 public class XNotifyVarPart implements XNotifyPart {
     private final String part;
+    private final String defaultValue;
     private final String templateVar;
+
+    public XNotifyVarPart(String part, String templateVar) {
+        int defaultValueIndex = part.indexOf(":!");
+
+        this.part = defaultValueIndex < 0 ? part : part.substring(0, defaultValueIndex);
+        this.defaultValue = defaultValueIndex < 0 ? "" : part.substring(defaultValueIndex + 2);
+        this.templateVar = templateVar;
+    }
 
     private String datetimePattern;
     static Pattern datePattern = Pattern.compile("(\\d+)(年|月|日)");
@@ -20,17 +28,22 @@ public class XNotifyVarPart implements XNotifyPart {
     public String eval(Object arg, Map<String, String> templateVars) {
         String value = evalText(arg);
 
-        templateVars.put(StringUtils.defaultIfEmpty(templateVar, part), value);
-        return value;
+        val templateVarName = StringUtils.defaultIfEmpty(templateVar, part);
+        val templateVarValue = StringUtils.defaultIfEmpty(value, defaultValue);
+
+        templateVars.put(templateVarName, templateVarValue);
+        return templateVarValue;
     }
 
     private String evalText(Object arg) {
+        if (arg == null) return "";
+
         if (arg instanceof DateTime) {
             if (datetimePattern == null) createDateTimePattern();
             return ((DateTime) arg).toString(datetimePattern);
-        } else {
-            return String.valueOf(arg);
         }
+
+        return arg.toString();
     }
 
     public boolean isVar() {

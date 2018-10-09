@@ -100,7 +100,12 @@ public class XNotifyTemplate {
 
         Map<String, String> templateVars = Maps.newHashMap();
         for (val part : parts) {
-            msg.append(part.eval(part.isVar() ? args[varIndices.get(i++)] : null, templateVars));
+            if (part.isVar()) {
+                Object arg = i < varIndices.size() ? args[varIndices.get(i++)] : null;
+                msg.append(part.eval(arg, templateVars));
+            } else {
+                msg.append(part.eval(null, templateVars));
+            }
         }
 
         String templateCode = xNotify.templateCode();
@@ -122,7 +127,8 @@ public class XNotifyTemplate {
 
     @SuppressWarnings("unchecked")
     public XNotifyTarget getTarget(Object[] args, String type) {
-        if (targetArgIndex < 0) return new XNotifyTarget() {};
+        if (targetArgIndex < 0) return new XNotifyTarget() {
+        };
 
         if (args[targetArgIndex] instanceof XNotifyTarget) {
             return (XNotifyTarget) args[targetArgIndex];

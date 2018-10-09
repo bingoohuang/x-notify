@@ -54,8 +54,8 @@ public class XNotifyFactory {
         val sigName = template.getSigName(args);
         val sender = xProvider.getSender();
         if (sender != null) {
-            val smsLog = sender.send(target, msgType, sigName, templateCode, eval.getTemplateVars(), eval.getText());
-            log.info("send log {}", smsLog);
+            val log = sender.send(target, msgType, sigName, templateCode, eval.getTemplateVars(), eval.getText());
+            XNotifyFactory.log.info("send log {}", log);
         }
     }
 }

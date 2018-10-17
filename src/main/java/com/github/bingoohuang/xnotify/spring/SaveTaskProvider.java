@@ -16,7 +16,7 @@ public class SaveTaskProvider extends SaveDbProvider {
         taskRunner.submit(TaskItemVo.builder()
                 .taskId(log.getLogId())
                 .taskName("XNotify")
-                .taskService(XNotifyTask.class.getSimpleName())
+                .taskServiceClass(XNotifyTask.class)
                 .build());
     }
 }

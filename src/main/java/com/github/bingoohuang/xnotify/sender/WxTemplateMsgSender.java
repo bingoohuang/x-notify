@@ -14,6 +14,7 @@ import lombok.val;
 import okhttp3.HttpUrl;
 import org.joda.time.DateTime;
 
+import java.net.Proxy;
 import java.util.Map;
 
 public abstract class WxTemplateMsgSender implements XNotifySender, XNotifyLogSender {
@@ -28,8 +29,12 @@ public abstract class WxTemplateMsgSender implements XNotifySender, XNotifyLogSe
 
         val templateId = getTemplateId(log);
         val content = json.replace("template_id_var", templateId);
-        sendTemplateMessage(getAccessToken(log), content);
+        sendTemplateMessage(getAccessToken(log), content, getProxy());
 
+        return null;
+    }
+
+    protected Proxy getProxy() {
         return null;
     }
 
@@ -42,20 +47,21 @@ public abstract class WxTemplateMsgSender implements XNotifySender, XNotifyLogSe
      *
      * @param accessToken 接口调用凭证
      * @param json        模板消息请求数据
+     * @param proxy       代理，没有代理时传null
      * @return 调用结果
      */
-    public static Rsp sendTemplateMessage(String accessToken, String json) {
+    public static Rsp sendTemplateMessage(String accessToken, String json, Proxy proxy) {
         val url = HttpUrl.parse("https://api.weixin.qq.com/cgi-bin/message/template/send").newBuilder()
                 .addQueryParameter("access_token", accessToken).toString();
 
-        val s = OkHttp.postJSON(url, json);
+        val s = OkHttp.postJSON(url, json, proxy);
         return JSON.parseObject(s, Rsp.class);
     }
 
     @Override public void send(XNotifyLog log) {
         val content = log.getEval().replace("template_id_var", getTemplateId(log));
         log.setEval(content);
-        sendTemplateMessage(getAccessToken(log), content);
+        sendTemplateMessage(getAccessToken(log), content, getProxy());
     }
 
     /**

@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.joda.time.DateTime;
 
+import java.net.Proxy;
 import java.util.Map;
 
 
@@ -57,13 +58,17 @@ public class YunpianSmsSender implements XNotifySender, XNotifyLogSender {
         val reqJson = JSON.toJSONString(req);
         smsLog.setReq(reqJson).setReqTime(DateTime.now());
 
-        val rspJSON = OkHttp.postForm("https://sms.yunpian.com/v2/sms/single_send.json", req);
+        val rspJSON = OkHttp.postForm("https://sms.yunpian.com/v2/sms/single_send.json", req, getProxy());
         smsLog.setRsp(rspJSON).setRspTime(DateTime.now());
 
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
         smsLog.setRspId("" + rsp.getSid()).setState(rsp.code == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
 
         return smsLog;
+    }
+
+    protected Proxy getProxy() {
+        return null;
     }
 
     // https://www.yunpian.com/doc/zh_CN/domestic/single_send.html

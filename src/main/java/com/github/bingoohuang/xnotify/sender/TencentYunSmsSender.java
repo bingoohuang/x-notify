@@ -15,6 +15,7 @@ import okhttp3.HttpUrl;
 import org.joda.time.DateTime;
 import org.n3r.eql.util.Hex;
 
+import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.List;
@@ -68,13 +69,17 @@ public class TencentYunSmsSender implements XNotifySender, XNotifyLogSender {
         val reqJson = JSON.toJSONString(req);
         smsLog.setReq(reqJson).setReqTime(DateTime.now());
 
-        val rspJSON = OkHttp.postJSON(url, reqJson);
+        val rspJSON = OkHttp.postJSON(url, reqJson, getProxy());
         smsLog.setRsp(rspJSON).setRspTime(DateTime.now());
 
         val rsp = JSON.parseObject(rspJSON, Rsp.class);
         smsLog.setRspId(rsp.getSid()).setState(rsp.result == 0 ? 2 /* SUCC */ : 3 /* FAIL */);
 
         return smsLog;
+    }
+
+    protected Proxy getProxy() {
+        return null;
     }
 
     private List<String> createParams(Map<String, String> params) {

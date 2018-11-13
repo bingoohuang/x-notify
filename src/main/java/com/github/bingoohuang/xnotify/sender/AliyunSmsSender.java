@@ -18,6 +18,7 @@ import org.joda.time.DateTime;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.net.Proxy;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -90,7 +91,7 @@ public class AliyunSmsSender implements XNotifySender, XNotifyLogSender {
         smsLog.setReq(JSON.toJSONString(paras)).setReqTime(DateTime.now());
 
         // 最终打印出合法GET请求的URL
-        val rspJSON = OkHttp.encodedGet("http://dysmsapi.aliyuncs.com/", paras);
+        val rspJSON = OkHttp.encodedGet("http://dysmsapi.aliyuncs.com/", paras, getProxy());
 
         smsLog.setRsp(rspJSON).setRspTime(DateTime.now());
 
@@ -99,6 +100,10 @@ public class AliyunSmsSender implements XNotifySender, XNotifyLogSender {
                 .setRspId(rsp.getRequestId());
 
         return smsLog;
+    }
+
+    protected Proxy getProxy() {
+        return null;
     }
 
     @SneakyThrows

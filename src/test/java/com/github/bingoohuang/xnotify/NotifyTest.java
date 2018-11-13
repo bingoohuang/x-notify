@@ -63,7 +63,7 @@ public class NotifyTest {
         assertThat(XNotifyLogs.size()).isEqualTo(2);
         assertThat(XNotifyLogs.get(1).getUsername()).isEqualTo("bingoohuang");
 
-        val text3 = sms.sendConfirmCode("18551855099", code);
+        val text3 = sms.sendConfirmCode("18551855099", "移动帮", code);
         assertThat(text3).isEqualTo("验证码为：" + code + "（15分钟内有效），验证码打死也不要告诉别人哦！默认场馆名称");
     }
 
@@ -80,7 +80,7 @@ public class NotifyTest {
         String sendConfirmCode(XNotifyTarget target, @XNotifyParam("signName") String signName, String code, String merchantName);
 
         @XNotify(value = "验证码为：#code#（15分钟内有效），验证码打死也不要告诉别人哦！#name:!默认场馆名称#", templateCode = "tencent:68689,aliyun:SMS_12841674")
-        String sendConfirmCode(@XNotifyParam("target") String target, String code);
+        String sendConfirmCode(@XNotifyParam("target") String target, @XNotifyParam("signName") String signName, String code);
     }
 
 

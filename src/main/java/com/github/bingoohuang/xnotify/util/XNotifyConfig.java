@@ -1,8 +1,6 @@
 package com.github.bingoohuang.xnotify.util;
 
-import com.github.bingoohuang.utils.lang.ClzPath;
-import lombok.SneakyThrows;
-import lombok.val;
+import com.github.bingoohuang.utils.lang.Classpath;
 
 import java.util.Properties;
 
@@ -11,15 +9,7 @@ public interface XNotifyConfig {
         return get(key);
     }
 
-    Properties config = loadEnvProperties();
-
-    @SneakyThrows
-    static Properties loadEnvProperties() {
-        val is = ClzPath.toInputStream("xnotify.properties");
-        val p = new Properties();
-        p.load(is);
-        return p;
-    }
+    Properties config = Classpath.loadEnvProperties("xnotify.properties");
 
     static String get(String name) {
         return config.getProperty(name);

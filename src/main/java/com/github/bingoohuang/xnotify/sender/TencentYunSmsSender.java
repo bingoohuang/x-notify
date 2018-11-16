@@ -2,12 +2,12 @@ package com.github.bingoohuang.xnotify.sender;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.annotation.JSONField;
+import com.github.bingoohuang.utils.net.OkHttp;
 import com.github.bingoohuang.westid.WestId;
 import com.github.bingoohuang.xnotify.XNotifyLogSender;
 import com.github.bingoohuang.xnotify.XNotifySender;
 import com.github.bingoohuang.xnotify.XNotifyTarget;
 import com.github.bingoohuang.xnotify.impl.XNotifyLog;
-import com.github.bingoohuang.xnotify.util.OkHttp;
 import com.google.common.collect.Lists;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

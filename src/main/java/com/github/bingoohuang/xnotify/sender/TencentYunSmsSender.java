@@ -51,7 +51,7 @@ public class TencentYunSmsSender implements XNotifySender, XNotifyLogSender {
     }
 
     private XNotifyLog send(XNotifyLog smsLog, String mobile, String signName, int templateCode, List<String> params, String random) {
-        val url = HttpUrl.parse("https://yun.tim.qq.com/v5/tlssmssvr/sendsms").newBuilder()
+        val url = HttpUrl.get("https://yun.tim.qq.com/v5/tlssmssvr/sendsms").newBuilder()
                 .addQueryParameter("sdkappid", sdkAppId) // sdkappid 请填写您在腾讯云上申请到的
                 .addQueryParameter("random", random)     // random 请填成随机数。
                 .toString();

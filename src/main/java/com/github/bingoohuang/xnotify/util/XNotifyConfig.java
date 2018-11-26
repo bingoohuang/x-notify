@@ -9,7 +9,7 @@ public interface XNotifyConfig {
         return get(key);
     }
 
-    Properties config = Classpath.loadEnvProperties("xnotify.properties");
+    Properties config = Classpath.loadProperties("xnotify.properties");
 
     static String get(String name) {
         return config.getProperty(name);

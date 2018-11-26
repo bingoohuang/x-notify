@@ -1,6 +1,5 @@
 package com.github.bingoohuang.xnotify.spring;
 
-import org.n3r.eql.eqler.spring.EqlerScannerRegistrar;
 import org.springframework.beans.factory.support.BeanNameGenerator;
 import org.springframework.context.annotation.Import;
 

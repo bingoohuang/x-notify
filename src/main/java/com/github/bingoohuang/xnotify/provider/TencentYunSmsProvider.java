@@ -12,7 +12,7 @@ public class TencentYunSmsProvider implements XProvider {
     }
 
     @Override public XNotifySender getSender() {
-        val config = Classpath.loadEnvProperties("tencent-sms.properties");
+        val config = Classpath.loadProperties("tencent-sms.properties");
         return new TencentYunSmsSender(config.getProperty("appKey"), config.getProperty("sdkAppId"));
     }
 }

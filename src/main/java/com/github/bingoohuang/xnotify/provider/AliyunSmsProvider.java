@@ -12,7 +12,7 @@ public class AliyunSmsProvider implements XProvider {
     }
 
     @Override public XNotifySender getSender() {
-        val config = Classpath.loadEnvProperties("aliyun-sms.properties");
+        val config = Classpath.loadProperties("aliyun-sms.properties");
         return new AliyunSmsSender(config.getProperty("accessKeyId"), config.getProperty("accessSecret"));
     }
 }

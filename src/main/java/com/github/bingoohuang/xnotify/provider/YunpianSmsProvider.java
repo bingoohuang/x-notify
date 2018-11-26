@@ -12,7 +12,7 @@ public class YunpianSmsProvider implements XProvider {
     }
 
     @Override public XNotifySender getSender() {
-        val config = Classpath.loadEnvProperties("yunpian-sms.properties");
+        val config = Classpath.loadProperties("yunpian-sms.properties");
         return new YunpianSmsSender(config.getProperty("apikey"));
     }
 }

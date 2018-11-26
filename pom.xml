@@ -6,7 +6,7 @@
 
     <groupId>com.github.bingoohuang</groupId>
     <artifactId>x-notify</artifactId>
-    <version>0.0.6-SNAPSHOT</version>
+    <version>0.0.7-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>x-notify</name>
@@ -51,7 +51,7 @@
         <dependency>
             <groupId>com.github.bingoohuang</groupId>
             <artifactId>java-utils</artifactId>
-            <version>0.0.18</version>
+            <version>0.0.22</version>
         </dependency>
         <dependency>
             <groupId>com.alibaba</groupId>

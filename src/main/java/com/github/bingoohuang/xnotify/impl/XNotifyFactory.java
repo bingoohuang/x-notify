@@ -31,7 +31,7 @@ public class XNotifyFactory {
 
         val xNotifyProvider = interfaceClass.getAnnotation(XNotifyProvider.class);
         if (xNotifyProvider != null) {
-            XProvider xProvider = SpringAppContext.getBean(xNotifyProvider.value());
+            XProvider xProvider = SpringAppContext.getBeanOrNull(xNotifyProvider.value());
             if (xProvider == null)
                 xProvider = Reflect.on(xNotifyProvider.value()).create().get();
 

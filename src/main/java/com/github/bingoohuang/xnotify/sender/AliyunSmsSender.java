@@ -86,7 +86,7 @@ public class AliyunSmsSender implements XNotifySender, XNotifyLogSender {
         val toSign = "GET&" + enc("/") + "&" + enc(sb.substring(1));
         val sign = hmacSHA1Base64(toSign, accessSecret + "&");
         // 4. 签名最后也要做特殊URL编码
-        paras.put("Signature", enc(sign));
+        paras.put("Signature", sign);
 
         smsLog.setReq(JSON.toJSONString(paras)).setReqTime(DateTime.now());
 
